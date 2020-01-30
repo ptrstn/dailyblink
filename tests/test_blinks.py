@@ -1,9 +1,9 @@
-from blinks import (
+from dailyblink.blinks import (
+    get_daily_blink_info,
+    request_blinkist_book,
     request_audio,
     save_audio_content,
     save_book_text,
-    get_daily_blink_info,
-    request_blinkist_book,
     main,
 )
 
