@@ -12,7 +12,6 @@ install:
 
 script:
   - pytest --cov .
-  - pip install --user git+https://github.com/ptrstn/dailyblink
   - dailyblink
 
 after_success:
