@@ -8,8 +8,10 @@ Both German and English.
 
 ## Installation
 
+Install [Python 3.6+](https://www.python.org/) and run:
+
 ```bash
-pip install git+https://github.com/ptrstn/dailyblink
+pip install --user git+https://github.com/ptrstn/dailyblink
 ```
 
 ## Usage
