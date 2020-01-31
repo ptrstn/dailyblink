@@ -59,6 +59,10 @@ def request_audio(book_id, chapter_id):
     url = f"{BASE_URL}/api/books/{book_id}/chapters/{chapter_id}/audio"
     headers = {"x-requested-with": "XMLHttpRequest"}
     response = requests.get(url, headers=headers)
+    if response.status_code == 404:  # Text only book, no audio
+        raise ValueError(
+            f"Audio track does not exist for book {book_id} chapter {chapter_id}"
+        )
     audio_url = response.json().get("url")
     return requests.get(audio_url)
 
@@ -119,11 +123,14 @@ def main():
             file_path=f"{directory}/{valid_title} {valid_author}.md",
         )
 
-        for number, chapter_id in enumerate(chapter_ids):
-            print(f"Saving track {number}...")
-            file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
-            audio_response = request_audio(book_id, chapter_id)
-            save_audio_content(audio_response, file_path)
+        try:
+            for number, chapter_id in enumerate(chapter_ids):
+                print(f"Saving track {number}...")
+                file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
+                audio_response = request_audio(book_id, chapter_id)
+                save_audio_content(audio_response, file_path)
+        except ValueError:
+            print("No audio tracks are available.")
 
         print()
 

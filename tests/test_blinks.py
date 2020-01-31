@@ -34,13 +34,16 @@ def test_request_audio():
     book_id = blink["book-id"]
     chapter_ids = blink["chapter-ids"]
 
-    track_00 = request_audio(book_id, chapter_ids[0])
-    track_01 = request_audio(book_id, chapter_ids[1])
-    track_02 = request_audio(book_id, chapter_ids[2])
+    try:
+        track_00 = request_audio(book_id, chapter_ids[0])
+        track_01 = request_audio(book_id, chapter_ids[1])
+        track_02 = request_audio(book_id, chapter_ids[2])
 
-    save_audio_content(track_00, file_path="test_output/track_00.m4a")
-    save_audio_content(track_01, file_path="test_output/track_01.m4a")
-    save_audio_content(track_02, file_path="test_output/track_02.m4a")
+        save_audio_content(track_00, file_path="test_output/track_00.m4a")
+        save_audio_content(track_01, file_path="test_output/track_01.m4a")
+        save_audio_content(track_02, file_path="test_output/track_02.m4a")
+    except ValueError as e:
+        print(e)
 
 
 def test_request_meta_data():
