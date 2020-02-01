@@ -13,7 +13,7 @@ def _create_blink_info(response_text):
 
     daily_book_href = soup.findAll("a", {"class": "daily-book__cta"})[0]["href"]
     title = soup.findAll("", {"class": "daily-book__headline"})[0].text.strip()
-    author = soup.findAll("", {"class": "daily-book__author"})[0].text.strip()
+    author = soup.findAll("", {"class": "daily-book__author"})[0].text.strip().split(' ', 1)[1]
     read_time = soup.findAll("", {"class": "book-stats__label"})[0].text.strip()
     synopsis = soup.findAll("", {"class": "book-tabs__content"})[0].text.strip()
     for_who = soup.findAll("", {"class": "book-tabs__content"})[1].text.strip()
@@ -36,23 +36,28 @@ def get_daily_blink_info(language="en"):
     return _create_blink_info(response.text)
 
 
-def request_blinkist_book(blink_url):
+def request_blinkist_book_text(blink_url):
     response = requests.get(blink_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
     book_id = soup.findAll("div", {"class": "reader__container"})[0]["data-book-id"]
 
-    chapter_elements = soup.findAll("li", {"class": "chapters"})
+    chapter_list_elements = soup.findAll("li", {"class": "chapters"})
     chapter_ids = [
         chapter_element["data-chapterid"]
-        for chapter_element in chapter_elements
+        for chapter_element in chapter_list_elements
         if "data-chapterid" in chapter_element.attrs
     ]
 
     chapters = soup.findAll("", {"class": "chapter chapter"})
     book_text = [chapter.text.strip() for chapter in chapters]
 
-    return {"book-id": book_id, "chapter-ids": chapter_ids, "book_text": book_text}
+    chapter_texts = [
+        (chapter.split('\n', 1)[0], chapter.split('\n', 1)[1])
+        for chapter in book_text
+    ]
+
+    return {"book-id": book_id, "chapter-ids": chapter_ids, "chapters": chapter_texts}
 
 
 def request_audio(book_id, chapter_id):
@@ -74,7 +79,7 @@ def save_audio_content(audio_response, file_path):
         file.write(audio_response.content)
 
 
-def save_book_text(blink_info, book_text, file_path):
+def save_book_text(blink_info, chapters, file_path):
     pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
     with open(file_path, "w+") as file:
@@ -85,9 +90,9 @@ def save_book_text(blink_info, book_text, file_path):
         file.write(f"### Synopsis\n\n{blink_info['synopsis']}\n\n")
         file.write(f"### Who is it for?\n\n{blink_info['for_who']}\n\n")
         file.write(f"### About the author\n\n{blink_info['about_author']}\n\n")
-        for number, chapter in enumerate(book_text):
-            file.write(f"## Blink {number} \n\n")
-            file.write(f"{chapter}\n\n")
+        for number, chapter in enumerate(chapters):
+            file.write(f"## Blink {number} - {chapter[0]} \n\n")
+            file.write(f"{chapter[1]}\n\n")
 
 
 def main():
@@ -105,12 +110,12 @@ def main():
         blink_url = blink_info["url"]
 
         print(f"{language} ({language_code}):")
-        print(f"{blink_info['title']} {blink_info['author']}\n")
+        print(f"{blink_info['title']} - {blink_info['author']}\n")
 
-        blink = request_blinkist_book(blink_url)
+        blink = request_blinkist_book_text(blink_url)
         book_id = blink["book-id"]
         chapter_ids = blink["chapter-ids"]
-        book_text = blink["book_text"]
+        chapters = blink["chapters"]
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
@@ -119,13 +124,13 @@ def main():
         print("Saving book text...")
         save_book_text(
             blink_info,
-            book_text,
+            chapters,
             file_path=f"{directory}/{valid_title} {valid_author}.md",
         )
 
         try:
             for number, chapter_id in enumerate(chapter_ids):
-                print(f"Saving track {number}...")
+                print(f"Saving audio track from Blink #{number} - {chapters[number][0][:50]}...")
                 file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
                 audio_response = request_audio(book_id, chapter_id)
                 save_audio_content(audio_response, file_path)

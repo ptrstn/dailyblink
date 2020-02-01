@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="dailyblink",
-    version="0.0.3",
+    version="0.0.4",
     url="https://github.com/ptrstn/daily-blinkist",
     packages=find_packages(),
     install_requires=["requests", "beautifulsoup4"],
