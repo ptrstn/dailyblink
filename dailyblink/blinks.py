@@ -125,7 +125,7 @@ def main():
         save_book_text(
             blink_info,
             chapters,
-            file_path=f"{directory}/{valid_title} {valid_author}.md",
+            file_path=f"{directory}/{valid_title} - {valid_author}.md",
         )
 
         try:
