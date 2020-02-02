@@ -1,6 +1,7 @@
 import pathlib
 import re
 from datetime import date
+from mutagen.mp4 import MP4
 
 import requests
 from bs4 import BeautifulSoup
@@ -13,7 +14,11 @@ def _create_blink_info(response_text):
 
     daily_book_href = soup.findAll("a", {"class": "daily-book__cta"})[0]["href"]
     title = soup.findAll("", {"class": "daily-book__headline"})[0].text.strip()
-    author = soup.findAll("", {"class": "daily-book__author"})[0].text.strip().split(' ', 1)[1]
+    author = (
+        soup.findAll("", {"class": "daily-book__author"})[0]
+        .text.strip()
+        .split(" ", 1)[1]
+    )
     read_time = soup.findAll("", {"class": "book-stats__label"})[0].text.strip()
     synopsis = soup.findAll("", {"class": "book-tabs__content"})[0].text.strip()
     for_who = soup.findAll("", {"class": "book-tabs__content"})[1].text.strip()
@@ -53,8 +58,7 @@ def request_blinkist_book_text(blink_url):
     book_text = [chapter.text.strip() for chapter in chapters]
 
     chapter_texts = [
-        (chapter.split('\n', 1)[0], chapter.split('\n', 1)[1])
-        for chapter in book_text
+        (chapter.split("\n", 1)[0], chapter.split("\n", 1)[1]) for chapter in book_text
     ]
 
     return {"book-id": book_id, "chapter-ids": chapter_ids, "chapters": chapter_texts}
@@ -95,6 +99,26 @@ def save_book_text(blink_info, chapters, file_path):
             file.write(f"{chapter[1]}\n\n")
 
 
+def set_m4a_meta_data(
+    filename,
+    artist=None,
+    title=None,
+    album=None,
+    track_number=None,
+    total_track_number=None,
+):
+    tags = MP4(filename).tags
+    if artist:
+        tags["\xa9ART"] = artist
+    if title:
+        tags["\xa9alb"] = album
+    if album:
+        tags["\xa9nam"] = title
+    if track_number and total_track_number:
+        tags["trkn"] = [(track_number, total_track_number)]
+    tags.save(filename)
+
+
 def main():
     print("Downloading the free daily Blinks...\n")
 
@@ -130,10 +154,20 @@ def main():
 
         try:
             for number, chapter_id in enumerate(chapter_ids):
-                print(f"Saving audio track from Blink #{number} - {chapters[number][0][:50]}...")
+                print(
+                    f"Saving audio track from Blink #{number} - {chapters[number][0][:50]}..."
+                )
                 file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
                 audio_response = request_audio(book_id, chapter_id)
                 save_audio_content(audio_response, file_path)
+                set_m4a_meta_data(
+                    filename=file_path,
+                    artist=blink_info["author"],
+                    title=chapters[number][0],
+                    album=blink_info["title"],
+                    track_number=number + 1,
+                    total_track_number=len(chapter_ids),
+                )
         except ValueError:
             print("No audio tracks are available.")
 
