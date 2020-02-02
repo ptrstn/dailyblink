@@ -14,12 +14,6 @@ Install [Python 3.6+](https://www.python.org/) and run:
 pip install --user git+https://github.com/ptrstn/dailyblink
 ```
 
-**_or_** inside a virtual environment:
-
-```bash
-pip install git+https://github.com/ptrstn/dailyblink
-```
-
 ## Usage
 
 ```bash
