@@ -23,6 +23,7 @@ def _create_blink_info(response_text):
     synopsis = soup.findAll("", {"class": "book-tabs__content"})[0].text.strip()
     for_who = soup.findAll("", {"class": "book-tabs__content"})[1].text.strip()
     about_author = soup.findAll("", {"class": "book-tabs__content"})[2].text.strip()
+    cover_url = soup.findAll("img", {"class": "daily-book__image"})[0]["src"]
 
     return {
         "url": BASE_URL + daily_book_href,
@@ -32,6 +33,7 @@ def _create_blink_info(response_text):
         "synopsis": synopsis,
         "for_who": for_who,
         "about_author": about_author,
+        "cover_url": cover_url,
     }
 
 
@@ -83,20 +85,34 @@ def save_audio_content(audio_response, file_path):
         file.write(audio_response.content)
 
 
+def save_book_cover(cover_url, file_path):
+    pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(file_path, "wb") as file:
+        file.write(requests.get(cover_url).content)
+
+
 def save_book_text(blink_info, chapters, file_path):
     pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
     with open(file_path, "w+") as file:
-        file.write(f"# {blink_info['title']} \n\n")
-        file.write(f"_{blink_info['author']}_ \n\n")
-        file.write(f"{blink_info['read_time']} \n\n")
-        file.write(f"{blink_info['url']} \n\n")
+        file.write(f"# {blink_info['title']}\n\n")
+        file.write(f"_{blink_info['author']}_\n\n")
+        file.write(f"{blink_info['read_time']}\n\n")
+        file.write("![cover](cover.jpg)\n\n")
+
         file.write(f"### Synopsis\n\n{blink_info['synopsis']}\n\n")
         file.write(f"### Who is it for?\n\n{blink_info['for_who']}\n\n")
         file.write(f"### About the author\n\n{blink_info['about_author']}\n\n")
         for number, chapter in enumerate(chapters):
-            file.write(f"## Blink {number} - {chapter[0]} \n\n")
+            if number != 0 and number != len(chapters) - 1:
+                file.write(f"## Blink {number} - {chapter[0]}\n\n")
+            else:
+                file.write(f"## {chapter[0]}\n\n")
+
             file.write(f"{chapter[1]}\n\n")
+
+        file.write(f"Source: {blink_info['url']}\n\n")
 
 
 def set_m4a_meta_data(
@@ -150,6 +166,11 @@ def main():
             blink_info,
             chapters,
             file_path=f"{directory}/{valid_title} - {valid_author}.md",
+        )
+
+        print("Saving book cover...")
+        save_book_cover(
+            blink_info["cover_url"], file_path=f"{directory}/cover.jpg",
         )
 
         try:
