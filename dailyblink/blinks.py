@@ -176,7 +176,7 @@ def main():
         try:
             for number, chapter_id in enumerate(chapter_ids):
                 print(
-                    f"Saving audio track from Blink #{number} - {chapters[number][0][:40]}..."
+                    f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
                 )
                 file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
                 audio_response = request_audio(book_id, chapter_id)
