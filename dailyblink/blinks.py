@@ -122,6 +122,7 @@ def set_m4a_meta_data(
     album=None,
     track_number=None,
     total_track_number=None,
+    genre=None,
 ):
     tags = MP4(filename).tags
     if artist:
@@ -132,6 +133,8 @@ def set_m4a_meta_data(
         tags["\xa9nam"] = title
     if track_number and total_track_number:
         tags["trkn"] = [(track_number, total_track_number)]
+    if genre:
+        tags["\xa9gen"] = genre
     tags.save(filename)
 
 
@@ -188,6 +191,7 @@ def main():
                     album=blink_info["title"],
                     track_number=number + 1,
                     total_track_number=len(chapter_ids),
+                    genre="Blinkist audiobook"
                 )
         except ValueError:
             print("No audio tracks are available.")
