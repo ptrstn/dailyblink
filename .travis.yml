@@ -7,7 +7,7 @@ python:
   - "nightly"
 
 install:
-  - pip install pytest codecov pytest-cov
+  - pip install --upgrade pytest codecov pytest-cov
   - pip install -e .
 
 script:

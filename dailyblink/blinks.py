@@ -23,7 +23,7 @@ def _create_blink_info(response_text):
     synopsis = soup.findAll("", {"class": "book-tabs__content"})[0].text.strip()
     for_who = soup.findAll("", {"class": "book-tabs__content"})[1].text.strip()
     about_author = soup.findAll("", {"class": "book-tabs__content"})[2].text.strip()
-    cover_url = soup.findAll("img", {"class": "daily-book__image"})[0]["src"]
+    cover_url = soup.findAll("img", {"class": "book-cover__image"})[0]["src"]
 
     return {
         "url": BASE_URL + daily_book_href,
@@ -191,7 +191,7 @@ def main():
                     album=blink_info["title"],
                     track_number=number + 1,
                     total_track_number=len(chapter_ids),
-                    genre="Blinkist audiobook"
+                    genre="Blinkist audiobook",
                 )
         except ValueError:
             print("No audio tracks are available.")
