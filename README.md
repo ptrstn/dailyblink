@@ -1,3 +1,4 @@
+[![Actions Status](https://github.com/ptrstn/dailyblink/workflows/Python%20package/badge.svg)](https://github.com/ptrstn/dailyblink/actions)
 [![Build Status](https://travis-ci.com/ptrstn/dailyblink.svg?branch=master)](https://travis-ci.com/ptrstn/dailyblink)
 [![codecov](https://codecov.io/gh/ptrstn/dailyblink/branch/master/graph/badge.svg)](https://codecov.io/gh/ptrstn/dailyblink)
 
