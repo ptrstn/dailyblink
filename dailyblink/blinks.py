@@ -13,18 +13,18 @@ scraper = cloudscraper.create_scraper()
 
 def _create_blink_info(response_text):
     soup = BeautifulSoup(response_text, "html.parser")
-    daily_book_href = soup.findAll("a", {"class": "daily-book__cta"})[0]["href"]
-    title = soup.findAll("", {"class": "daily-book__headline"})[0].text.strip()
+    daily_book_href = soup.find_all("a", {"class": "daily-book__cta"})[0]["href"]
+    title = soup.find_all(None, {"class": "daily-book__headline"})[0].text.strip()
     author = (
-        soup.findAll("", {"class": "daily-book__author"})[0]
+        soup.find_all(None, {"class": "daily-book__author"})[0]
         .text.strip()
         .split(" ", 1)[1]
     )
-    read_time = soup.findAll("", {"class": "book-stats__label"})[0].text.strip()
-    synopsis = soup.findAll("", {"class": "book-tabs__content"})[0].text.strip()
-    for_who = soup.findAll("", {"class": "book-tabs__content"})[1].text.strip()
-    about_author = soup.findAll("", {"class": "book-tabs__content"})[2].text.strip()
-    cover_url = soup.findAll("img", {"class": "book-cover__image"})[0]["src"]
+    read_time = soup.find_all(None, {"class": "book-stats__label"})[0].text.strip()
+    synopsis = soup.find_all(None, {"class": "book-tabs__content"})[0].text.strip()
+    for_who = soup.find_all(None, {"class": "book-tabs__content"})[1].text.strip()
+    about_author = soup.find_all(None, {"class": "book-tabs__content"})[2].text.strip()
+    cover_url = soup.find_all("img", {"class": "book-cover__image"})[0]["src"]
 
     return {
         "url": BASE_URL + daily_book_href,
@@ -48,16 +48,16 @@ def request_blinkist_book_text(blink_url):
     response = scraper.get(blink_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    book_id = soup.findAll("div", {"class": "reader__container"})[0]["data-book-id"]
+    book_id = soup.find_all("div", {"class": "reader__container"})[0]["data-book-id"]
 
-    chapter_list_elements = soup.findAll("li", {"class": "chapters"})
+    chapter_list_elements = soup.find_all("li", {"class": "chapters"})
     chapter_ids = [
         chapter_element["data-chapterid"]
         for chapter_element in chapter_list_elements
         if "data-chapterid" in chapter_element.attrs
     ]
 
-    chapters = soup.findAll("", {"class": "chapter chapter"})
+    chapters = soup.find_all(None, {"class": "chapter chapter"})
     book_text = [chapter.text.strip() for chapter in chapters]
 
     chapter_texts = [
