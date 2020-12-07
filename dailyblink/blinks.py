@@ -1,17 +1,18 @@
 import pathlib
 import re
 from datetime import date
+
+import cloudscraper
+from bs4 import BeautifulSoup
 from mutagen.mp4 import MP4
 
-import requests
-from bs4 import BeautifulSoup
-
 BASE_URL = "https://www.blinkist.com"
+
+scraper = cloudscraper.create_scraper()
 
 
 def _create_blink_info(response_text):
     soup = BeautifulSoup(response_text, "html.parser")
-
     daily_book_href = soup.findAll("a", {"class": "daily-book__cta"})[0]["href"]
     title = soup.findAll("", {"class": "daily-book__headline"})[0].text.strip()
     author = (
@@ -39,12 +40,12 @@ def _create_blink_info(response_text):
 
 def get_daily_blink_info(language="en"):
     daily_blink_url = f"{BASE_URL}/{language}/nc/daily/"
-    response = requests.get(daily_blink_url)
+    response = scraper.get(daily_blink_url)
     return _create_blink_info(response.text)
 
 
 def request_blinkist_book_text(blink_url):
-    response = requests.get(blink_url)
+    response = scraper.get(blink_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
     book_id = soup.findAll("div", {"class": "reader__container"})[0]["data-book-id"]
@@ -69,13 +70,13 @@ def request_blinkist_book_text(blink_url):
 def request_audio(book_id, chapter_id):
     url = f"{BASE_URL}/api/books/{book_id}/chapters/{chapter_id}/audio"
     headers = {"x-requested-with": "XMLHttpRequest"}
-    response = requests.get(url, headers=headers)
+    response = scraper.get(url, headers=headers)
     if response.status_code == 404:  # Text only book, no audio
         raise ValueError(
             f"Audio track does not exist for book {book_id} chapter {chapter_id}"
         )
     audio_url = response.json().get("url")
-    return requests.get(audio_url)
+    return scraper.get(audio_url)
 
 
 def save_audio_content(audio_response, file_path):
@@ -89,7 +90,7 @@ def save_book_cover(cover_url, file_path):
     pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
     with open(file_path, "wb") as file:
-        file.write(requests.get(cover_url).content)
+        file.write(scraper.get(cover_url).content)
 
 
 def save_book_text(blink_info, chapters, file_path):
