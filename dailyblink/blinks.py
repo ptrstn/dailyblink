@@ -1,3 +1,5 @@
+import argparse
+import os
 import pathlib
 import re
 from datetime import date
@@ -140,14 +142,16 @@ def set_m4a_meta_data(
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Tool to fetch daily free blinks.')
+    parser.add_argument('-o', '--output', help='Output directory. Default: CWD.', metavar='PATH', default=os.getcwd())
+    args = parser.parse_args()
+
     print("Downloading the free daily Blinks...\n")
 
     languages = {
         "english": "en",
         "german": "de",
     }
-
-    base_directory = pathlib.Path(pathlib.Path.home(), "Musik", "blinks")
 
     for language, language_code in languages.items():
         blink_info = get_daily_blink_info(language=language_code)
@@ -163,7 +167,7 @@ def main():
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = f"{base_directory}/{language}/{date.today()} - {valid_title}"
+        directory = f"{args.output}/{language}/{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
@@ -199,7 +203,7 @@ def main():
 
         print()
 
-    print(f"All blinks were saved under {base_directory}")
+    print(f"All blinks were saved under {args.output}")
 
 
 if __name__ == "__main__":
