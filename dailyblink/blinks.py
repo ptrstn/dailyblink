@@ -178,11 +178,13 @@ def main():
         )
 
         try:
+            file_paths = []
             for number, chapter_id in enumerate(chapter_ids):
                 print(
                     f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
                 )
                 file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
+                file_paths.append(file_path)
                 audio_response = request_audio(book_id, chapter_id)
                 save_audio_content(audio_response, file_path)
                 set_m4a_meta_data(
@@ -194,6 +196,8 @@ def main():
                     total_track_number=len(chapter_ids),
                     genre="Blinkist audiobook",
                 )
+            with open(f"{directory}/{valid_title} - {valid_author}.m3u", 'w') as f:
+                f.write("\n".join(file_paths))
         except ValueError:
             print("No audio tracks are available.")
 
