@@ -147,7 +147,7 @@ def main():
         "german": "de",
     }
 
-    base_directory = pathlib.Path(pathlib.Path.home(), "Musik", "blinks")
+    base_directory = pathlib.Path.home()/"Musik"/"blinks"
 
     for language, language_code in languages.items():
         blink_info = get_daily_blink_info(language=language_code)
@@ -163,13 +163,13 @@ def main():
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = f"{base_directory}/{language}/{date.today()} - {valid_title}"
+        directory = base_directory/language/f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
             blink_info,
             chapters,
-            file_path=f"{directory}/{valid_title} - {valid_author}.md",
+            file_path=directory/f"{valid_title} - {valid_author}.md",
         )
 
         print("Saving book cover...")
@@ -178,13 +178,14 @@ def main():
         )
 
         try:
-            file_paths = []
+            file_list = []
             for number, chapter_id in enumerate(chapter_ids):
                 print(
                     f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
                 )
-                file_path = f"{directory}/{number:02d} - {valid_title}.m4a"
-                file_paths.append(file_path)
+                file_name = f"{number:02d} - {valid_title}.m4a"
+                file_path = directory/file_name
+                file_list.append(file_name)
                 audio_response = request_audio(book_id, chapter_id)
                 save_audio_content(audio_response, file_path)
                 set_m4a_meta_data(
@@ -196,8 +197,8 @@ def main():
                     total_track_number=len(chapter_ids),
                     genre="Blinkist audiobook",
                 )
-            with open(f"{directory}/{valid_title} - {valid_author}.m3u", 'w') as f:
-                f.write("\n".join(file_paths))
+            with open(directory/f"{valid_title} - {valid_author}.m3u", 'w') as f:
+                f.write("\n".join(file_list))
         except ValueError:
             print("No audio tracks are available.")
 
