@@ -197,7 +197,7 @@ def main():
                     total_track_number=len(chapter_ids),
                     genre="Blinkist audiobook",
                 )
-            with open(directory/f"{valid_title} - {valid_author}.m3u", 'w') as f:
+            with open(directory/"playlist.m3u", 'w') as f:
                 f.write("\n".join(file_list))
         except ValueError:
             print("No audio tracks are available.")
