@@ -126,6 +126,9 @@ def set_m4a_meta_data(
     genre=None,
 ):
     tags = MP4(filename).tags
+	if tags is None:
+        return
+		
     if artist:
         tags["\xa9ART"] = artist
     if title:
