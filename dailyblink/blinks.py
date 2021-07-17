@@ -96,25 +96,27 @@ def save_book_cover(cover_url, file_path):
 def save_book_text(blink_info, chapters, file_path):
     pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
-    with open(file_path, "w+") as file:
-        file.write(f"# {blink_info['title']}\n\n")
-        file.write(f"_{blink_info['author']}_\n\n")
-        file.write(f"{blink_info['read_time']}\n\n")
-        file.write("![cover](cover.jpg)\n\n")
+    try:
+        with open(file_path, "w+") as file:
+            file.write(f"# {blink_info['title']}\n\n")
+            file.write(f"_{blink_info['author']}_\n\n")
+            file.write(f"{blink_info['read_time']}\n\n")
+            file.write("![cover](cover.jpg)\n\n")
 
-        file.write(f"### Synopsis\n\n{blink_info['synopsis']}\n\n")
-        file.write(f"### Who is it for?\n\n{blink_info['for_who']}\n\n")
-        file.write(f"### About the author\n\n{blink_info['about_author']}\n\n")
-        for number, chapter in enumerate(chapters):
-            if number != 0 and number != len(chapters) - 1:
-                file.write(f"## Blink {number} - {chapter[0]}\n\n")
-            else:
-                file.write(f"## {chapter[0]}\n\n")
+            file.write(f"### Synopsis\n\n{blink_info['synopsis']}\n\n")
+            file.write(f"### Who is it for?\n\n{blink_info['for_who']}\n\n")
+            file.write(f"### About the author\n\n{blink_info['about_author']}\n\n")
+            for number, chapter in enumerate(chapters):
+                if number != 0 and number != len(chapters) - 1:
+                    file.write(f"## Blink {number} - {chapter[0]}\n\n")
+                else:
+                    file.write(f"## {chapter[0]}\n\n")
 
-            file.write(f"{chapter[1]}\n\n")
+                file.write(f"{chapter[1]}\n\n")
 
-        file.write(f"Source: {blink_info['url']}\n\n")
-
+            file.write(f"Source: {blink_info['url']}\n\n")
+    except UnicodeEncodeError:
+        print("Failed to save book text due to UnicodeEncodeError.")
 
 def set_m4a_meta_data(
     filename,
