@@ -4,7 +4,7 @@ from datetime import date
 
 import cloudscraper
 from bs4 import BeautifulSoup
-from mutagen.mp4 import MP4
+from mutagen.mp4 import MP4, MP4Tags
 
 BASE_URL = "https://www.blinkist.com"
 
@@ -125,18 +125,22 @@ def set_m4a_meta_data(
     total_track_number=None,
     genre=None,
 ):
-    tags = MP4(filename).tags
+    mp4 = MP4(filename)
+
+    if not mp4.tags:
+        mp4.tags = MP4Tags()
+
     if artist:
-        tags["\xa9ART"] = artist
+        mp4.tags["\xa9ART"] = artist
     if title:
-        tags["\xa9alb"] = album
+        mp4.tags["\xa9alb"] = album
     if album:
-        tags["\xa9nam"] = title
+        mp4.tags["\xa9nam"] = title
     if track_number and total_track_number:
-        tags["trkn"] = [(track_number, total_track_number)]
+        mp4.tags["trkn"] = [(track_number, total_track_number)]
     if genre:
-        tags["\xa9gen"] = genre
-    tags.save(filename)
+        mp4.tags["\xa9gen"] = genre
+    mp4.tags.save(filename)
 
 
 def main():
