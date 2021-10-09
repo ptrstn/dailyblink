@@ -125,7 +125,13 @@ def set_m4a_meta_data(
     total_track_number=None,
     genre=None,
 ):
-    tags = MP4(filename).tags
+    mp4_file = MP4(filename)
+
+    if not mp4_file.tags:
+        mp4_file.add_tags()
+
+    tags = mp4_file.tags
+
     if artist:
         tags["\xa9ART"] = artist
     if title:
@@ -147,7 +153,7 @@ def main():
         "german": "de",
     }
 
-    base_directory = pathlib.Path.home()/"Musik"/"blinks"
+    base_directory = pathlib.Path.home() / "Musik" / "blinks"
 
     for language, language_code in languages.items():
         blink_info = get_daily_blink_info(language=language_code)
@@ -163,18 +169,19 @@ def main():
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = base_directory/language/f"{date.today()} - {valid_title}"
+        directory = base_directory / language / f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
             blink_info,
             chapters,
-            file_path=directory/f"{valid_title} - {valid_author}.md",
+            file_path=directory / f"{valid_title} - {valid_author}.md",
         )
 
         print("Saving book cover...")
         save_book_cover(
-            blink_info["cover_url"], file_path=f"{directory}/cover.jpg",
+            blink_info["cover_url"],
+            file_path=f"{directory}/cover.jpg",
         )
 
         try:
@@ -184,7 +191,7 @@ def main():
                     f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
                 )
                 file_name = f"{number:02d} - {valid_title}.m4a"
-                file_path = directory/file_name
+                file_path = directory / file_name
                 file_list.append(file_name)
                 audio_response = request_audio(book_id, chapter_id)
                 save_audio_content(audio_response, file_path)
