@@ -11,3 +11,6 @@ AVAILABLE_LANGUAGES = {
     "english": "en",
     "german": "de",
 }
+
+MAX_CLOUDFLARE_ATTEMPTS = 10
+CLOUDFLARE_WAIT_TIME = 2
