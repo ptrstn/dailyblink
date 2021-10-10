@@ -3,4 +3,4 @@ omit =
     venv/*
     tests/*
     setup.py
-    dailyblink/blinkist.py
+    dailyblink/__main__.py
