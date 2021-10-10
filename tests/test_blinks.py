@@ -1,4 +1,6 @@
-from dailyblink.__main__ import main
+import pathlib
+
+from dailyblink.__main__ import download_blinks
 
 from dailyblink.core import (
     get_daily_blink_info,
@@ -7,6 +9,7 @@ from dailyblink.core import (
     save_audio_content,
     save_book_text,
 )
+from dailyblink.settings import AVAILABLE_LANGUAGES
 
 
 def test_get_daily_blink_url():
@@ -69,5 +72,5 @@ def test_save_book_text():
     save_book_text(blink_info, chapters, file_path="test_output/daily_blink.md")
 
 
-def test_main():
-    main()
+def test_download_blinks():
+    download_blinks(AVAILABLE_LANGUAGES, pathlib.Path(".") / "blinks")
