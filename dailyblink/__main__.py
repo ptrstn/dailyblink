@@ -1,6 +1,9 @@
+import argparse
+import pathlib
 import re
 from datetime import date
 
+from dailyblink import __version__
 from dailyblink.core import (
     get_daily_blink_info,
     request_blinkist_book_text,
@@ -10,17 +13,44 @@ from dailyblink.core import (
     save_audio_content,
     set_m4a_meta_data,
 )
-from dailyblink.settings import BLINKS_PATH, COVER_FILE_NAME, PLAYLIST_FILE_NAME
+from dailyblink.settings import (
+    COVER_FILE_NAME,
+    PLAYLIST_FILE_NAME,
+    AVAILABLE_LANGUAGES,
+    BLINKS_DEFAULT_PATH,
+    BLINKS_DIR_NAME,
+)
 
 
-def main():
-    print("Downloading the free daily Blinks...\n")
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        description="Tool to download the audio and text of the free daily book from blinkist.com",
+    )
 
-    languages = {
-        "english": "en",
-        "german": "de",
-    }
+    parser.add_argument(
+        "--version", action="version", version="%(prog)s {}".format(__version__)
+    )
 
+    parser.add_argument(
+        "-p",
+        "--path",
+        default=BLINKS_DEFAULT_PATH,
+        help=f"Path of where the blinks should be saved. Default: {BLINKS_DEFAULT_PATH}",
+    )
+
+    parser.add_argument(
+        "-l",
+        "--language",
+        nargs="+",
+        choices=["en", "de"],
+        default=["en", "de"],
+        help="Language of the free daily. Default: english german",
+    )
+
+    return parser.parse_args()
+
+
+def download_blinks(languages, base_path):
     for language, language_code in languages.items():
         blink_info = get_daily_blink_info(language=language_code)
         blink_url = blink_info["url"]
@@ -35,7 +65,7 @@ def main():
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = BLINKS_PATH / language / f"{date.today()} - {valid_title}"
+        directory = base_path / language / f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
@@ -78,7 +108,22 @@ def main():
 
         print()
 
-    print(f"All blinks were saved under {BLINKS_PATH}")
+    print(f"All blinks were saved under {base_path.absolute()}")
+
+
+def main():
+    args = parse_arguments()
+    print("Downloading the free daily Blinks...\n")
+
+    languages = {
+        key: value
+        for key, value in AVAILABLE_LANGUAGES.items()
+        if value in args.language
+    }
+
+    base_path = pathlib.Path(args.path) / BLINKS_DIR_NAME
+
+    download_blinks(languages, base_path)
 
 
 if __name__ == "__main__":

@@ -17,11 +17,13 @@ pip install --user git+https://github.com/ptrstn/dailyblink
 
 ## Usage
 
+You can download all freely available blinks from that day by just running:
+
 ```bash
 dailyblink
 ```
 
-All blinks are saved in your home directory under ```Musik/blinks```. One folder per book.
+By default, all blinks are saved in your home directory under ```Musik/blinks```. One folder per book.
 
 Example:
 
@@ -60,4 +62,43 @@ Saving audio track #9 - Die britische Politik ignoriert den Rass...
 Saving audio track #10 - Zusammenfassung...
 
 All blinks were saved under ~/Musik/blinks
+```
+
+### Custom output path
+
+If you want to specify a different path where to store the blinks, you can pass the ```--path``` argument.
+
+For example, you could use ```--path .``` to download in the current working directory:
+
+```bash
+dailyblink --path .
+```
+
+### Restrict languages
+
+If you only want to download blinks from only a certain language you can pass the ```--language``` argument following the languages you would like to be used.
+
+For example (```de``` for German, ```en``` for English):
+
+```bash
+dailyblink --language de en
+```
+
+### Help
+
+```bash
+dailyblink --help
+```
+
+```bash
+usage: dailyblink [-h] [--version] [-p PATH] [-l {en,de} [{en,de} ...]]
+
+Tool to download the audio and text of the free daily book from blinkist.com
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -p PATH, --path PATH  Path of where the blinks should be saved. Default: ~/Musik
+  -l {en,de} [{en,de} ...], --language {en,de} [{en,de} ...]
+                        Language of the free daily. Default: english german
 ```

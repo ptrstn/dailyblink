@@ -1,10 +1,11 @@
-from dailyblink.blinks import (
+from dailyblink.__main__ import main
+
+from dailyblink.core import (
     get_daily_blink_info,
     request_blinkist_book_text,
     request_audio,
     save_audio_content,
     save_book_text,
-    main,
 )
 
 
