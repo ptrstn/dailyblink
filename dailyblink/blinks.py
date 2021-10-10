@@ -8,6 +8,11 @@ from mutagen.mp4 import MP4
 
 BASE_URL = "https://www.blinkist.com"
 
+COVER_FILE_NAME = "cover.jpg"
+PLAYLIST_FILE_NAME = "playlist.m3u"
+BLINKS_PATH = pathlib.Path.home() / "Musik" / "blinks"
+
+
 scraper = cloudscraper.create_scraper()
 
 
@@ -100,7 +105,7 @@ def save_book_text(blink_info, chapters, file_path):
         file.write(f"# {blink_info['title']}\n\n")
         file.write(f"_{blink_info['author']}_\n\n")
         file.write(f"{blink_info['read_time']}\n\n")
-        file.write("![cover](cover.jpg)\n\n")
+        file.write(f"![cover]({COVER_FILE_NAME})\n\n")
 
         file.write(f"### Synopsis\n\n{blink_info['synopsis']}\n\n")
         file.write(f"### Who is it for?\n\n{blink_info['for_who']}\n\n")
@@ -153,8 +158,6 @@ def main():
         "german": "de",
     }
 
-    base_directory = pathlib.Path.home() / "Musik" / "blinks"
-
     for language, language_code in languages.items():
         blink_info = get_daily_blink_info(language=language_code)
         blink_url = blink_info["url"]
@@ -169,7 +172,7 @@ def main():
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = base_directory / language / f"{date.today()} - {valid_title}"
+        directory = BLINKS_PATH / language / f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
@@ -181,7 +184,7 @@ def main():
         print("Saving book cover...")
         save_book_cover(
             blink_info["cover_url"],
-            file_path=f"{directory}/cover.jpg",
+            file_path=directory / COVER_FILE_NAME,
         )
 
         try:
@@ -204,14 +207,15 @@ def main():
                     total_track_number=len(chapter_ids),
                     genre="Blinkist audiobook",
                 )
-            with open(directory/"playlist.m3u", 'w') as f:
+            with open(directory / PLAYLIST_FILE_NAME, "w") as f:
+                print("Creating playlist file...")
                 f.write("\n".join(file_list))
         except ValueError:
             print("No audio tracks are available.")
 
         print()
 
-    print(f"All blinks were saved under {base_directory}")
+    print(f"All blinks were saved under {BLINKS_PATH}")
 
 
 if __name__ == "__main__":
