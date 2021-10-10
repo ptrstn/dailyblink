@@ -1,12 +1,9 @@
 import pathlib
 
-import cloudscraper
 from bs4 import BeautifulSoup
 from mutagen.mp4 import MP4
 
 from dailyblink.settings import BASE_URL, COVER_FILE_NAME
-
-scraper = cloudscraper.create_scraper()
 
 
 def _create_blink_info(response_text):
@@ -36,13 +33,13 @@ def _create_blink_info(response_text):
     }
 
 
-def get_daily_blink_info(language="en"):
+def get_daily_blink_info(scraper, language="en"):
     daily_blink_url = f"{BASE_URL}/{language}/nc/daily/"
     response = scraper.get(daily_blink_url)
     return _create_blink_info(response.text)
 
 
-def request_blinkist_book_text(blink_url):
+def request_blinkist_book_text(scraper, blink_url):
     response = scraper.get(blink_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -65,7 +62,7 @@ def request_blinkist_book_text(blink_url):
     return {"book-id": book_id, "chapter-ids": chapter_ids, "chapters": chapter_texts}
 
 
-def request_audio(book_id, chapter_id):
+def request_audio(scraper, book_id, chapter_id):
     url = f"{BASE_URL}/api/books/{book_id}/chapters/{chapter_id}/audio"
     headers = {"x-requested-with": "XMLHttpRequest"}
     response = scraper.get(url, headers=headers)
@@ -84,7 +81,7 @@ def save_audio_content(audio_response, file_path):
         file.write(audio_response.content)
 
 
-def save_book_cover(cover_url, file_path):
+def save_book_cover(scraper, cover_url, file_path):
     pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
 
     with open(file_path, "wb") as file:

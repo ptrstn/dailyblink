@@ -1,7 +1,11 @@
 import argparse
 import pathlib
 import re
+import time
 from datetime import date
+
+import cloudscraper
+from cloudscraper import CloudflareChallengeError
 
 from dailyblink import __version__
 from dailyblink.core import (
@@ -19,6 +23,8 @@ from dailyblink.settings import (
     AVAILABLE_LANGUAGES,
     BLINKS_DEFAULT_PATH,
     BLINKS_DIR_NAME,
+    MAX_CLOUDFLARE_ATTEMPTS,
+    CLOUDFLARE_WAIT_TIME,
 )
 
 
@@ -50,34 +56,36 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def download_blinks(languages, base_path):
+def download_blinks(scraper, languages, base_path):
     for language, language_code in languages.items():
-        blink_info = get_daily_blink_info(language=language_code)
+        blink_info = get_daily_blink_info(scraper=scraper, language=language_code)
         blink_url = blink_info["url"]
 
+        print()
         print(f"{language} ({language_code}):")
         print(f"{blink_info['title']} - {blink_info['author']}\n")
 
-        blink = request_blinkist_book_text(blink_url)
+        blink = request_blinkist_book_text(scraper=scraper, blink_url=blink_url)
         book_id = blink["book-id"]
         chapter_ids = blink["chapter-ids"]
         chapters = blink["chapters"]
 
         valid_title = re.sub(r"([^\s\w]|_)+", "", blink_info["title"])
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
-        directory = base_path / language / f"{date.today()} - {valid_title}"
+        book_path = base_path / language / f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
         save_book_text(
-            blink_info,
-            chapters,
-            file_path=directory / f"{valid_title} - {valid_author}.md",
+            blink_info=blink_info,
+            chapters=chapters,
+            file_path=book_path / f"{valid_title} - {valid_author}.md",
         )
 
         print("Saving book cover...")
         save_book_cover(
-            blink_info["cover_url"],
-            file_path=directory / COVER_FILE_NAME,
+            scraper=scraper,
+            cover_url=blink_info["cover_url"],
+            file_path=book_path / COVER_FILE_NAME,
         )
 
         try:
@@ -87,10 +95,12 @@ def download_blinks(languages, base_path):
                     f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
                 )
                 file_name = f"{number:02d} - {valid_title}.m4a"
-                file_path = directory / file_name
+                file_path = book_path / file_name
                 file_list.append(file_name)
-                audio_response = request_audio(book_id, chapter_id)
-                save_audio_content(audio_response, file_path)
+                audio_response = request_audio(
+                    scraper=scraper, book_id=book_id, chapter_id=chapter_id
+                )
+                save_audio_content(audio_response=audio_response, file_path=file_path)
                 set_m4a_meta_data(
                     filename=file_path,
                     artist=blink_info["author"],
@@ -100,7 +110,7 @@ def download_blinks(languages, base_path):
                     total_track_number=len(chapter_ids),
                     genre="Blinkist audiobook",
                 )
-            with open(directory / PLAYLIST_FILE_NAME, "w") as f:
+            with open(book_path / PLAYLIST_FILE_NAME, "w") as f:
                 print("Creating playlist file...")
                 f.write("\n".join(file_list))
         except ValueError:
@@ -122,8 +132,21 @@ def main():
     }
 
     base_path = pathlib.Path(args.path) / BLINKS_DIR_NAME
+    scraper = cloudscraper.create_scraper()
 
-    download_blinks(languages, base_path)
+    try:
+        download_blinks(scraper, languages, base_path)
+    except CloudflareChallengeError as e:
+        print(e)
+        print("Retrying...")
+        for index in range(1, MAX_CLOUDFLARE_ATTEMPTS + 1):
+            print(f"Attempt {index}/{MAX_CLOUDFLARE_ATTEMPTS}... ", end="")
+            time.sleep(CLOUDFLARE_WAIT_TIME)
+            scraper = cloudscraper.create_scraper()
+            try:
+                download_blinks(scraper, languages, base_path)
+            except CloudflareChallengeError:
+                print("FAILED")
 
 
 if __name__ == "__main__":
