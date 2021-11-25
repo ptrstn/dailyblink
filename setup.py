@@ -24,6 +24,8 @@ setup(
     name="dailyblink",
     version=find_version("dailyblink", "__init__.py"),
     url="https://github.com/ptrstn/dailyblink",
+    author="Peter Stein",
+    license="MIT",
     packages=find_packages(),
     install_requires=["requests", "beautifulsoup4", "mutagen", "cloudscraper"],
     entry_points={"console_scripts": ["dailyblink=dailyblink.__main__:main"]},
