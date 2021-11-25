@@ -19,8 +19,8 @@ from dailyblink.utils import download_blinks
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description=(
-            "Tool to download the audio and text of the free daily book from"
-            " blinkist.com"
+            "Tool to download the audio and text "
+            "of the free daily book from blinkist.com"
         ),
     )
 
