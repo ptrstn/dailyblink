@@ -19,7 +19,7 @@ pip install --user git+https://github.com/ptrstn/dailyblink
 You can download all freely available blinks from that day by just running:
 
 ```bash
-dailyblink
+python -m dailyblink
 ```
 
 By default, all blinks are saved in your home directory under ```Musik/blinks```. One folder per book.
