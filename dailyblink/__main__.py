@@ -18,7 +18,10 @@ from dailyblink.utils import download_blinks
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description="Tool to download the audio and text of the free daily book from blinkist.com",
+        description=(
+            "Tool to download the audio and text of the free daily book from"
+            " blinkist.com"
+        ),
     )
 
     parser.add_argument(
@@ -29,7 +32,9 @@ def parse_arguments():
         "-p",
         "--path",
         default=BLINKS_DEFAULT_PATH,
-        help=f"Path of where the blinks should be saved. Default: {BLINKS_DEFAULT_PATH}",
+        help=(
+            f"Path of where the blinks should be saved. Default: {BLINKS_DEFAULT_PATH}"
+        ),
     )
 
     parser.add_argument(
