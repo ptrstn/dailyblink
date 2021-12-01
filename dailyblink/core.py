@@ -6,20 +6,25 @@ from mutagen.mp4 import MP4
 from dailyblink.settings import BASE_URL, COVER_FILE_NAME
 
 
+def _safe_index(a, b):
+    return "" if not a else a[b]
+
+
 def _create_blink_info(response_text):
+    def safe_strip(a):
+        return "" if not a else a.text.strip()
+
     soup = BeautifulSoup(response_text, "html.parser")
-    daily_book_href = soup.find_all("a", {"class": "daily-book__cta"})[0]["href"]
-    title = soup.find_all(None, {"class": "daily-book__headline"})[0].text.strip()
+    daily_book_href = _safe_index(_safe_index(soup.find_all("a", {"class": "daily-book__cta"}), 0), "href")
+    title = safe_strip(_safe_index(soup.find_all(None, {"class": "daily-book__headline"}), 0))
     author = (
-        soup.find_all(None, {"class": "daily-book__author"})[0]
-        .text.strip()
-        .split(" ", 1)[1]
+        _safe_index(safe_strip(_safe_index(soup.find_all(None, {"class": "daily-book__author"}), 0)).split(" ", 1), 1)
     )
-    read_time = soup.find_all(None, {"class": "book-stats__label"})[0].text.strip()
-    synopsis = soup.find_all(None, {"class": "book-tabs__content"})[0].text.strip()
-    for_who = soup.find_all(None, {"class": "book-tabs__content"})[1].text.strip()
-    about_author = soup.find_all(None, {"class": "book-tabs__content"})[2].text.strip()
-    cover_url = soup.find_all("img", {"class": "book-cover__image"})[0]["src"]
+    read_time = safe_strip(_safe_index(soup.find_all(None, {"class": "book-stats__label"}), 0))
+    synopsis = safe_strip(_safe_index(soup.find_all(None, {"class": "book-tabs__content"}), 0))
+    for_who = safe_strip(_safe_index(soup.find_all(None, {"class": "book-tabs__content"}), 1))
+    about_author = safe_strip(_safe_index(soup.find_all(None, {"class": "book-tabs__content"}), 2))
+    cover_url = _safe_index(_safe_index(soup.find_all("img", {"class": "book-cover__image"}), 0), "src")
 
     return {
         "url": BASE_URL + daily_book_href,
@@ -43,7 +48,7 @@ def request_blinkist_book_text(scraper, blink_url):
     response = scraper.get(blink_url)
     soup = BeautifulSoup(response.text, "html.parser")
 
-    book_id = soup.find_all("div", {"class": "reader__container"})[0]["data-book-id"]
+    book_id = _safe_index(_safe_index(soup.find_all("div", {"class": "reader__container"}), 0), "data-book-id")
 
     chapter_list_elements = soup.find_all("li", {"class": "chapters"})
     chapter_ids = [
@@ -127,14 +132,15 @@ def set_m4a_meta_data(
 
     tags = mp4_file.tags
 
-    if artist:
-        tags["\xa9ART"] = artist
-    if title:
-        tags["\xa9alb"] = album
-    if album:
-        tags["\xa9nam"] = title
+    def safe_assign(b, c):
+        if c and tags[b]:
+            tags[b] = c
+
+    safe_assign("\xa9ART", artist)
+    safe_assign("\xa9alb", album)
+    safe_assign("\xa9nam", title)
     if track_number and total_track_number:
-        tags["trkn"] = [(track_number, total_track_number)]
-    if genre:
-        tags["\xa9gen"] = genre
+        safe_assign("trkn", [(track_number, total_track_number)])
+    safe_assign("\xa9gen", genre)
+
     tags.save(filename)

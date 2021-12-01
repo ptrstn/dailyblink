@@ -38,12 +38,13 @@ def download_blinks(scraper, languages, base_path):
             file_path=book_path / f"{valid_title} - {valid_author}.md",
         )
 
-        print("Saving book cover...")
-        save_book_cover(
-            scraper=scraper,
-            cover_url=blink_info["cover_url"],
-            file_path=book_path / COVER_FILE_NAME,
-        )
+        if blink_info["cover_url"]:
+            print("Saving book cover...")
+            save_book_cover(
+                scraper=scraper,
+                cover_url=blink_info["cover_url"],
+                file_path=book_path / COVER_FILE_NAME,
+            )
 
         try:
             file_list = []
