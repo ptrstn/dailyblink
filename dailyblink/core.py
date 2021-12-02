@@ -19,7 +19,7 @@ def _create_blink_info(response_text):
     synopsis = soup.find_all(None, {"class": "book-tabs__content"})[0].text.strip()
     for_who = soup.find_all(None, {"class": "book-tabs__content"})[1].text.strip()
     about_author = soup.find_all(None, {"class": "book-tabs__content"})[2].text.strip()
-    cover_url = soup.find_all("img", {"class": "book-cover__image"})[0]["src"]
+    cover_url = soup.find_all("img", {"class": "legacy-book-cover__image"})[0]["src"]
 
     return {
         "url": BASE_URL + daily_book_href,
