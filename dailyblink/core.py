@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup
 from cloudscraper import CloudflareChallengeError
 
 from dailyblink.media import (
-    save_book_text,
     set_m4a_meta_data,
     save_media,
+    save_text,
 )
 from dailyblink.settings import (
     BASE_URL,
@@ -72,19 +72,15 @@ class BlinkistScraper:
         book_path = base_path / language / f"{date.today()} - {valid_title}"
 
         print("Saving book text...")
-        save_book_text(
-            blink_info=blink_info,
-            chapters=chapters,
-            file_path=book_path / f"{valid_title} - {valid_author}.md",
-        )
+        markdown_text = _create_markdown_text(blink_info, chapters)
+        markdown_book_path = book_path / f"{valid_title} - {valid_author}.md"
+        save_text(text=markdown_text, file_path=markdown_book_path)
 
         print("Saving book cover...")
         cover_response = self.scraper.get(blink_info["cover_url"])
-
-        save_media(
-            media=cover_response.content,
-            file_path=book_path / COVER_FILE_NAME,
-        )
+        cover = cover_response.content
+        cover_path = book_path / COVER_FILE_NAME
+        save_media(media=cover, file_path=cover_path)
 
         try:
             file_list = []
@@ -185,3 +181,24 @@ def _create_blink_info(response_text):
         "about_author": about_author,
         "cover_url": cover_url,
     }
+
+
+def _create_markdown_text(blink_info, chapters, cover_path=COVER_FILE_NAME):
+    markdown_text = f"# {blink_info['title']}\n\n"
+    markdown_text += f"_{blink_info['author']}_\n\n"
+    markdown_text += f"{blink_info['read_time']}\n\n"
+    markdown_text += f"![cover]({cover_path})\n\n"
+
+    markdown_text += f"### Synopsis\n\n{blink_info['synopsis']}\n\n"
+    markdown_text += f"### Who is it for?\n\n{blink_info['for_who']}\n\n"
+    markdown_text += f"### About the author\n\n{blink_info['about_author']}\n\n"
+    for number, chapter in enumerate(chapters):
+        if number != 0 and number != len(chapters) - 1:
+            markdown_text += f"## Blink {number} - {chapter[0]}\n\n"
+        else:
+            markdown_text += f"## {chapter[0]}\n\n"
+
+        markdown_text += f"{chapter[1]}\n\n"
+
+    markdown_text += f"Source: {blink_info['url']}\n\n"
+    return markdown_text
