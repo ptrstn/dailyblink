@@ -3,8 +3,9 @@ import pathlib
 from dailyblink.core import (
     save_media,
     BlinkistScraper,
+    _create_markdown_text,
 )
-from dailyblink.media import save_book_text
+from dailyblink.media import save_text
 
 blinkist_scraper = BlinkistScraper()
 
@@ -72,4 +73,5 @@ def test_save_book_text():
     blink_info = blinkist_scraper._get_daily_blink_info(language="de")
     blink_url = blink_info["url"]
     chapters = blinkist_scraper._request_blinkist_book_text(blink_url)["chapters"]
-    save_book_text(blink_info, chapters, file_path="test_output/daily_blink.md")
+    markdown_text = _create_markdown_text(blink_info, chapters)
+    save_text(markdown_text, file_path="test_output/daily_blink.md")
