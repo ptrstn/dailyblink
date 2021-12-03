@@ -7,9 +7,9 @@ PLAYLIST_FILE_NAME = "playlist.m3u"
 BLINKS_DEFAULT_PATH = pathlib.Path.home() / "Musik"
 BLINKS_DIR_NAME = "blinks"
 
-AVAILABLE_LANGUAGES = {
-    "english": "en",
-    "german": "de",
+LANGUAGES = {
+    "en": "english",
+    "de": "german",
 }
 
 MAX_CLOUDFLARE_ATTEMPTS = 10
