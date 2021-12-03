@@ -51,7 +51,7 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    print("Downloading the free daily Blinks...\n")
+    print("Downloading the free daily Blinks...")
 
     languages = {
         key: value

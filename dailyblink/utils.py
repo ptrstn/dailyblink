@@ -73,6 +73,5 @@ def download_blinks(scraper, languages, base_path):
         except ValueError:
             print("No audio tracks are available.")
 
-        print()
-
+    print()
     print(f"All blinks were saved under {base_path.absolute()}")
