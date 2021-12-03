@@ -1,5 +1,7 @@
 [![Actions Status](https://github.com/ptrstn/dailyblink/workflows/Python%20package/badge.svg)](https://github.com/ptrstn/dailyblink/actions)
 [![codecov](https://codecov.io/gh/ptrstn/dailyblink/branch/master/graph/badge.svg)](https://codecov.io/gh/ptrstn/dailyblink)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ptrstn/dailyblink)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 # Daily Blinkist downloader
 
