@@ -16,6 +16,14 @@ Install [Python 3.6+](https://www.python.org/) and run:
 pip install --user git+https://github.com/ptrstn/dailyblink
 ```
 
+## Update
+
+If you encounter an error or problem, make sure that you are using the latest version of this package:
+
+```bash
+pip install --upgrade --user git+https://github.com/ptrstn/dailyblink
+```
+
 ## Usage
 
 You can download all freely available blinks from that day by just running:
