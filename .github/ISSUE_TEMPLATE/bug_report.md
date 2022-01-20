@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 **Version of dailyblink**: <your version number>
+**Python version**:  <your Python version>
 **Operating system**:  <your operating system>
 
 ```bash
