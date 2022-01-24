@@ -3,19 +3,18 @@ import pathlib
 from mutagen.mp4 import MP4
 
 
-def create_file(content, path, mode):
-    pathlib.Path(path).parent.mkdir(parents=True, exist_ok=True)
-
-    with open(path, mode) as file:
-        file.write(content)
-
-
 def save_media(media, file_path):
-    create_file(content=media, path=file_path, mode="wb")
+    pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(file_path, mode="wb") as file:
+        file.write(media)
 
 
 def save_text(text, file_path):
-    create_file(content=text, path=file_path, mode="w+")
+    pathlib.Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+    with open(file_path, mode="w+", encoding="utf-8") as file:
+        file.write(text)
 
 
 def set_m4a_meta_data(
