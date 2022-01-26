@@ -1,3 +1,4 @@
+import datetime
 import pathlib
 import re
 import time
@@ -27,7 +28,9 @@ class BlinkistScraper:
         self._reset_cloudscraper()
 
     def download_daily_blinks(self, languages: list, base_path: pathlib.Path):
-        print("Downloading the free daily Blinks...")
+        current_date = datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"Downloading the free daily Blinks on {current_date}...")
+
         try:
             self._attempt_daily_blinks_download(languages, base_path)
         except CloudflareChallengeError as e:
