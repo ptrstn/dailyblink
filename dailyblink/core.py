@@ -116,6 +116,10 @@ class BlinkistScraper:
     def _get_daily_blink_info(self, language="en"):
         daily_blink_url = f"{BASE_URL}/{language}/nc/daily/"
         response = self.scraper.get(daily_blink_url)
+
+        if "complete the security check" in response.text:
+            raise CloudflareChallengeError()
+
         return _create_blink_info(response.text)
 
     def _request_blinkist_book_text(self, blink_url):
