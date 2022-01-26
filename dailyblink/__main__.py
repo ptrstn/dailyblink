@@ -1,5 +1,6 @@
 import argparse
 import pathlib
+import platform
 
 from dailyblink import __version__
 from dailyblink.core import BlinkistScraper
@@ -42,8 +43,19 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def get_current_machine():
+    return (
+        f"{platform.system()}"
+        f" {platform.machine()} "
+        f"{' '.join(platform.architecture())}"
+    )
+
+
 def main():
     args = parse_arguments()
+
+    machine = get_current_machine()
+    print(f"dailyblink v{__version__}, {machine}")
 
     base_path = pathlib.Path(args.path) / BLINKS_DIR_NAME
     blinkist_scraper = BlinkistScraper()
