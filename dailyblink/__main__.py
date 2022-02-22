@@ -45,6 +45,7 @@ def parse_arguments():
 
 def get_current_machine():
     return (
+        f"Python {platform.python_version()}, "
         f"{platform.system()}"
         f" {platform.machine()} "
         f"{' '.join(platform.architecture())}"
