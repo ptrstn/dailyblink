@@ -20,6 +20,7 @@ from dailyblink.settings import (
     LANGUAGES,
     MAX_CLOUDFLARE_ATTEMPTS,
     CLOUDFLARE_WAIT_TIME,
+    MAX_LINE_LENGTH,
 )
 
 
@@ -88,9 +89,9 @@ class BlinkistScraper:
         try:
             file_list = []
             for number, chapter_id in enumerate(chapter_ids):
-                print(
-                    f"Saving audio track #{number + 1} - {chapters[number][0][:40]}..."
-                )
+                status = f"Saving audio track #{number + 1} - {chapters[number][0]}"
+                status_limited = f"{status[:MAX_LINE_LENGTH-3]}..."
+                print(status_limited)
                 file_name = f"{number:02d} - {valid_title}.m4a"
                 file_path = book_path / file_name
                 file_list.append(file_name)
