@@ -1,9 +1,12 @@
 import pathlib
 
+import requests
+
 from dailyblink.core import (
     save_media,
     BlinkistScraper,
     _create_markdown_text,
+    _determine_file_extension,
 )
 from dailyblink.media import save_text
 
@@ -73,5 +76,33 @@ def test_save_book_text():
     blink_info = blinkist_scraper._get_daily_blink_info(language="de")
     blink_url = blink_info["url"]
     chapters = blinkist_scraper._request_blinkist_book_text(blink_url)["chapters"]
-    markdown_text = _create_markdown_text(blink_info, chapters)
+    markdown_text = _create_markdown_text(
+        blink_info, chapters, "test_output/cover.jpeg"
+    )
     save_text(markdown_text, file_path="test_output/daily_blink.md")
+
+
+def test_determine_file_extension():
+    headers = {
+        "user-agent": (
+            "Mozilla/5.0 (X11; Linux x86_64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/98.0.4758.80 Safari/537.36"
+        ),
+    }
+
+    jpg_url = (
+        "https://upload.wikimedia.org/wikipedia/commons/3/3f/JPEG_example_flower.jpg"
+    )
+    jpg_response = requests.get(jpg_url, headers=headers)
+    assert _determine_file_extension(jpg_response) == "jpeg"
+
+    png_url = "https://upload.wikimedia.org/wikipedia/de/b/bb/Png-logo.png"
+    png_response = requests.get(png_url, headers=headers)
+    assert _determine_file_extension(png_response) == "png"
+
+    cover_url = (
+        "https://images.blinkist.io/images/books/5e48b5726cee070006209356/1_1/470.jpg"
+    )
+    cover_response = requests.get(cover_url, headers=headers)
+    assert _determine_file_extension(cover_response) == "png"

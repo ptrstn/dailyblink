@@ -7,6 +7,7 @@ from datetime import date
 import cloudscraper
 from bs4 import BeautifulSoup
 from cloudscraper import CloudflareChallengeError
+from requests import Response
 
 from dailyblink.media import (
     set_m4a_meta_data,
@@ -15,7 +16,7 @@ from dailyblink.media import (
 )
 from dailyblink.settings import (
     BASE_URL,
-    COVER_FILE_NAME,
+    COVER_FILE_NAME_STEM,
     PLAYLIST_FILE_NAME,
     LANGUAGES,
     MAX_CLOUDFLARE_ATTEMPTS,
@@ -75,22 +76,23 @@ class BlinkistScraper:
         valid_author = re.sub(r"([^\s\w]|_)+", "", blink_info["author"])
         book_path = base_path / language / f"{date.today()} - {valid_title}"
 
-        print("Saving book text...")
-        markdown_text = _create_markdown_text(blink_info, chapters)
-        markdown_book_path = book_path / f"{valid_title} - {valid_author}.md"
-        save_text(text=markdown_text, file_path=markdown_book_path)
-
         print("Saving book cover...")
         cover_response = self.scraper.get(blink_info["cover_url"])
+        file_extension = _determine_file_extension(cover_response)
         cover = cover_response.content
-        cover_path = book_path / COVER_FILE_NAME
+        cover_path = book_path / f"{COVER_FILE_NAME_STEM}.{file_extension}"
         save_media(media=cover, file_path=cover_path)
+
+        print("Saving book text...")
+        markdown_text = _create_markdown_text(blink_info, chapters, cover_path)
+        markdown_book_path = book_path / f"{valid_title} - {valid_author}.md"
+        save_text(text=markdown_text, file_path=markdown_book_path)
 
         try:
             file_list = []
             for number, chapter_id in enumerate(chapter_ids):
                 status = f"Saving audio track #{number + 1} - {chapters[number][0]}"
-                status_limited = f"{status[:MAX_LINE_LENGTH-3]}..."
+                status_limited = f"{status[:MAX_LINE_LENGTH - 3]}..."
                 print(status_limited)
                 file_name = f"{number:02d} - {valid_title}.m4a"
                 file_path = book_path / file_name
@@ -191,7 +193,7 @@ def _create_blink_info(response_text):
     }
 
 
-def _create_markdown_text(blink_info, chapters, cover_path=COVER_FILE_NAME):
+def _create_markdown_text(blink_info, chapters, cover_path):
     markdown_text = f"# {blink_info['title']}\n\n"
     markdown_text += f"_{blink_info['author']}_\n\n"
     markdown_text += f"{blink_info['read_time']}\n\n"
@@ -210,3 +212,10 @@ def _create_markdown_text(blink_info, chapters, cover_path=COVER_FILE_NAME):
 
     markdown_text += f"Source: {blink_info['url']}\n\n"
     return markdown_text
+
+
+def _determine_file_extension(cover_response: Response) -> str:
+    headers = cover_response.headers
+    content_type = headers["content-type"]
+    _, file_extension = content_type.split("/")
+    return file_extension
