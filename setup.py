@@ -28,6 +28,6 @@ setup(
     license="MIT",
     python_requires=">3.6",
     packages=find_packages(),
-    install_requires=["requests", "beautifulsoup4", "mutagen", "cloudscraper==1.2.58"],
+    install_requires=["requests", "beautifulsoup4", "mutagen", "cloudscraper>=1.2.60"],
     entry_points={"console_scripts": ["dailyblink=dailyblink.__main__:main"]},
 )

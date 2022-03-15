@@ -6,7 +6,7 @@ from datetime import date
 
 import cloudscraper
 from bs4 import BeautifulSoup
-from cloudscraper import CloudflareChallengeError
+from cloudscraper.exceptions import CloudflareChallengeError
 from requests import Response
 
 from dailyblink.media import (
